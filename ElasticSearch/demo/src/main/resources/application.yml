@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: demo
+
+#  elasticsearch:
+#    uris: localhost:9200
+#    rest:
+#      username: elastic
+#      password: _dCvRaVzGBfBXMWkigt-
