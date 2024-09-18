@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserModel {
 
+    private Integer id;
     private String username;
     private String password;
 }

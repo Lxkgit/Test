@@ -32,7 +32,7 @@ class DemoApplicationTests {
 
 	@Test
 	public void contextLoads() throws IOException {
-		selectIndex();
+		selectData();
 	}
 
 
@@ -65,10 +65,10 @@ class DemoApplicationTests {
 	 * @throws IOException
 	 */
 	private void insertData() throws IOException {
-		UserModel userModel = new UserModel("张三", "zhangsan");
+		UserModel userModel = new UserModel(10, "张三10", "zhangsan10");
 
 		//创建请求
-		IndexRequest<UserModel> request = new IndexRequest.Builder<UserModel>().index("test_index").id("1")
+		IndexRequest<UserModel> request = new IndexRequest.Builder<UserModel>().index("test_index").id("2")
 				.timeout(new Time.Builder().time("1s").build()).document(userModel).build();
 
 		//发送请求，获取响应结果
@@ -82,10 +82,7 @@ class DemoApplicationTests {
 	 */
 	private void selectData() throws IOException {
 		//检查文档是否存在
-		ExistsRequest request = new ExistsRequest.Builder()
-				.index("test_index")
-				.id("1")
-				.build();
+		ExistsRequest request = new ExistsRequest.Builder().index("test_index").id("10").build();
 
 		BooleanResponse exists = elasticsearchClient.exists(request);
 		System.out.println("BooleanResponse: " + exists.value());
@@ -95,10 +92,7 @@ class DemoApplicationTests {
 		}
 
 		//若存在，则获取文档信息
-		GetRequest requestGet = new GetRequest.Builder()
-				.index("test_index")
-				.id("1")
-				.build();
+		GetRequest requestGet = new GetRequest.Builder().index("test_index").id("2").build();
 
 		GetResponse<? extends UserModel> responseGet = elasticsearchClient.get(requestGet, UserModel.class);
 		System.out.println(responseGet.toString());
@@ -111,14 +105,10 @@ class DemoApplicationTests {
 	 * @throws IOException
 	 */
 	private void updateData() throws IOException {
-		UserModel userModel = new UserModel("张三三", "zhangsansan");
+		UserModel userModel = new UserModel(3 , "张三三", "zhangsansan");
 
-		UpdateRequest<UserModel, UserModel> request = new UpdateRequest.Builder<UserModel, UserModel>()
-				.index("test_index")
-				.id("1")
-				.timeout(new Time.Builder().time("1s").build())
-				.doc(userModel)
-				.build();
+		UpdateRequest<UserModel, UserModel> request = new UpdateRequest.Builder<UserModel, UserModel>().index("test_index")
+				.id("2").timeout(new Time.Builder().time("1s").build()).doc(userModel).build();
 
 		UpdateResponse<UserModel> response = elasticsearchClient.update(request, UserModel.class);
 		System.out.println(response.toString());
@@ -129,11 +119,8 @@ class DemoApplicationTests {
 	 * @throws IOException
 	 */
 	private void deleteData() throws IOException {
-		DeleteRequest request = new DeleteRequest.Builder()
-				.index("test_index")
-				.id("1")
-				.timeout(new Time.Builder().time("1s").build())
-				.build();
+		DeleteRequest request = new DeleteRequest.Builder().index("test_index").id("1")
+				.timeout(new Time.Builder().time("1s").build()).build();
 
 		DeleteResponse response = elasticsearchClient.delete(request);
 		System.out.println(response.toString());
@@ -146,18 +133,13 @@ class DemoApplicationTests {
 	private void insertDataList() throws IOException {
 		List<BulkOperation> operations = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
-			UserModel userModel = new UserModel("张三" + i, "zhangsan" + i);
+			UserModel userModel = new UserModel(i, "张三" + i, "zhangsan" + i);
 			operations.add(new BulkOperation(new IndexOperation.Builder<UserModel>()
-					.id(String.valueOf(i + 1))
-					.document(userModel)
-					.build()));
+					.id(String.valueOf(i + 1)).document(userModel).build()));
 		}
 
-		BulkRequest request = new BulkRequest.Builder()
-				.index("test_index")
-				.timeout(new Time.Builder().time("10s").build())
-				.operations(operations)
-				.build();
+		BulkRequest request = new BulkRequest.Builder().index("test_index")
+				.timeout(new Time.Builder().time("10s").build()).operations(operations).build();
 
 		BulkResponse response = elasticsearchClient.bulk(request);
 		System.out.println(response.toString());
@@ -169,17 +151,11 @@ class DemoApplicationTests {
 	 */
 	private void matchQuery() throws IOException {
 		//查询条件
-		MatchQuery matchQuery = new MatchQuery.Builder()
-				.field("username")
-				.query("张三1")
-				.build();
+		MatchQuery matchQuery = new MatchQuery.Builder().field("username").query("张三1").build();
 
 		//构建搜索条件
-		SearchRequest request = new SearchRequest.Builder()
-				.index("test_index")
-				.timeout("10s")
-				.query(new Query.Builder().match(matchQuery).build())
-				.build();
+		SearchRequest request = new SearchRequest.Builder().index("test_index")
+				.timeout("10s").query(new Query.Builder().match(matchQuery).build()).build();
 
 		SearchResponse<UserModel> response = elasticsearchClient.search(request, UserModel.class);
 		System.out.println(response.hits().hits().toString());
@@ -190,16 +166,10 @@ class DemoApplicationTests {
 	 * @throws IOException
 	 */
 	private void termQuery() throws IOException {
-		TermQuery termQuery = new TermQuery.Builder()
-				.field("username.keyword")
-				.value("张三1")
-				.build();
+		TermQuery termQuery = new TermQuery.Builder().field("username.keyword").value("张三1").build();
 
-		SearchRequest request = new SearchRequest.Builder()
-				.index("test_index")
-				.timeout("10s")
-				.query(new Query.Builder().term(termQuery).build())
-				.build();
+		SearchRequest request = new SearchRequest.Builder().index("test_index")
+				.timeout("10s").query(new Query.Builder().term(termQuery).build()).build();
 
 		SearchResponse<UserModel> response = elasticsearchClient.search(request, UserModel.class);
 		System.out.println(response.hits().hits().toString());
@@ -210,14 +180,8 @@ class DemoApplicationTests {
 	 * @throws IOException
 	 */
 	private void boolQuery() throws IOException {
-		TermQuery termQuery1 = new TermQuery.Builder()
-				.field("username.keyword")
-				.value("张三1")
-				.build();
-		TermQuery termQuery2 = new TermQuery.Builder()
-				.field("password")
-				.value("zhangsan2")
-				.build();
+		TermQuery termQuery1 = new TermQuery.Builder().field("username.keyword").value("张三1").build();
+		TermQuery termQuery2 = new TermQuery.Builder().field("password").value("zhangsan2").build();
 
 		//组合查询
 		//must  AND
